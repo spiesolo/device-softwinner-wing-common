@@ -1,0 +1,53 @@
+From 400c241a3c8fb6a927b7d9eb00ec03246697ad77 Mon Sep 17 00:00:00 2001
+From: Yonghua Zheng <yonghua.zheng@esimtek.com>
+Date: Mon, 10 Jul 2017 16:44:05 +0800
+Subject: [PATCH 1/1] Patch to support to ft5x_ts touch screen
+
+A minor patch to bring up ft5x_ts touch screen on
+CloverBox, however might not work properly for other
+display orientation.
+
+It seems ft5x_ts doesn't support hovering and would
+report events at (0, 0) which should be ignored in
+Android. Need to check the chip specification if
+would like to know more detail.
+
+Change-Id: I26af0739b3c038de2cffa16030bb5ea047fde47f
+---
+ services/input/InputReader.cpp | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/services/input/InputReader.cpp b/services/input/InputReader.cpp
+index bc8df18..ad130bc 100644
+--- a/services/input/InputReader.cpp
++++ b/services/input/InputReader.cpp
+@@ -5906,6 +5906,11 @@ void MultiTouchInputMapper::syncTouch(nsecs_t when, bool* outHavePointerIds) {
+             continue;
+         }
+ 
++        // ignore zero-ed X & Y
++        if ((inSlot->getX() == 0) && (inSlot->getY() == 0)) {
++            continue;
++        }
++
+         if (outCount >= MAX_POINTERS) {
+ #if DEBUG_POINTERS
+             ALOGD("MultiTouch device %s emitted more than maximum of %d pointers; "
+@@ -5936,9 +5941,14 @@ void MultiTouchInputMapper::syncTouch(nsecs_t when, bool* outHavePointerIds) {
+             }
+         }
+ 
++#if 0
+         bool isHovering = mTouchButtonAccumulator.getToolType() != AMOTION_EVENT_TOOL_TYPE_MOUSE
+                 && (mTouchButtonAccumulator.isHovering()
+                         || (mRawPointerAxes.pressure.valid && inSlot->getPressure() <= 0));
++#else
++        // no hovering support for ft5x_ts?
++        bool isHovering = false;
++#endif
+         outPointer.isHovering = isHovering;
+ 
+         // Assign pointer id using tracking id if available.
+-- 
+2.7.4
+
