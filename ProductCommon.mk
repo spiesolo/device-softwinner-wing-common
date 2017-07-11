@@ -4,20 +4,21 @@ $(call inherit-product, device/softwinner/common/sw-common.mk)
 
 DEVICE_PACKAGE_OVERLAYS := device/softwinner/wing-common/overlay
 
+# hardware modules
 PRODUCT_PACKAGES += \
-  libion \
+	libion \
 	hwcomposer.exDroid \
 	display.exdroid \
 	camera.exDroid \
 	sensors.exDroid \
 	lights.sun7i \
-	display.sun7i
-
-PRODUCT_PACKAGES += \
+	display.sun7i \
 	audio.primary.exDroid \
 	audio.a2dp.default \
 	audio.usb.default  \
-	audio.r_submix.default \
+	audio.r_submix.default
+
+PRODUCT_PACKAGES += \
 	libaudioutils \
 	libcedarxbase \
 	libcedarxosal \
@@ -32,7 +33,7 @@ PRODUCT_PACKAGES += \
 	libfacedetection \
 	libthirdpartstream \
 	libcedarxsftstream \
-    libion_alloc \
+	libion_alloc \
 	libjpgenc \
 	libaw_h264enc \
 	libI420colorconvert \
@@ -67,14 +68,14 @@ PRODUCT_PACKAGES += \
 
 # softwinner	
 PRODUCT_PACKAGES +=  \
-   android.softwinner.framework.jar \
-   SoftWinnerService.apk \
-   backup/SoftWinnerService.apk \
-   libsoftwinner_servers.so \
-   libupdatesoftwinner.so \
-   librtsp.so \
-   libjni_fireair.so \
-   updatesoftwinner 
+	android.softwinner.framework.jar \
+	SoftWinnerService.apk \
+	backup/SoftWinnerService.apk \
+	libsoftwinner_servers.so \
+	libupdatesoftwinner.so \
+	librtsp.so \
+	libjni_fireair.so \
+	updatesoftwinner
 
 # keylayout
 PRODUCT_COPY_FILES += \
@@ -90,6 +91,11 @@ PRODUCT_COPY_FILES += \
 	device/softwinner/wing-common/egl/libGLESv1_CM_mali.so:system/lib/egl/libGLESv1_CM_mali.so \
 	device/softwinner/wing-common/egl/libGLESv2_mali.so:system/lib/egl/libGLESv2_mali.so \
 
+ifndef TARGET_PROVIDES_INIT_RC
+TARGET_PROVIDES_INIT_RC := false
+endif
+
+ifeq ($(TARGET_PROVIDES_INIT_RC), true)
 # init.rc, kernel
 DEVICE_PATH := device/softwinner/$(subst _,-,$(TARGET_PRODUCT))
 ifneq ($(wildcard $(DEVICE_PATH)/init.rc),)
@@ -99,9 +105,13 @@ else
 PRODUCT_COPY_FILES += \
 	device/softwinner/wing-common/init.rc:root/init.rc
 endif
+else
+PRODUCT_COPY_FILES += \
+	system/core/rootdir/init.rc:root/init.rc
+endif
 
 PRODUCT_COPY_FILES += \
-    device/softwinner/wing-common/init.sun7i.usb.rc:root/init.sun7i.usb.rc
+	device/softwinner/wing-common/init.sun7i.usb.rc:root/init.sun7i.usb.rc
 
 # for boot nand/card auto detect 
 PRODUCT_COPY_FILES += \
@@ -109,18 +119,17 @@ PRODUCT_COPY_FILES += \
 	device/softwinner/wing-common/init_parttion.sh:root/sbin/init_parttion.sh \
 	device/softwinner/wing-common/busybox:recovery/root/sbin/busybox \
 	device/softwinner/wing-common/init_parttion.sh:recovery/root/sbin/init_parttion.sh \
-	
 
-#premission feature
+# premission feature
 PRODUCT_COPY_FILES += \
-    frameworks/native/data/etc/android.hardware.location.xml:system/etc/permissions/android.hardware.location.xml \
-    frameworks/native/data/etc/android.hardware.sensor.accelerometer.xml:system/etc/permissions/android.hardware.sensor.accelerometer.xml \
-    frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
-    frameworks/native/data/etc/android.hardware.touchscreen.xml:system/etc/permissions/android.hardware.touchscreen.xml \
-    frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
-    frameworks/native/data/etc/android.hardware.touchscreen.multitouch.distinct.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.distinct.xml \
-		frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
-    frameworks/native/data/etc/android.hardware.usb.host.xml:system/etc/permissions/android.hardware.usb.host.xml \
+	frameworks/native/data/etc/android.hardware.location.xml:system/etc/permissions/android.hardware.location.xml \
+	frameworks/native/data/etc/android.hardware.sensor.accelerometer.xml:system/etc/permissions/android.hardware.sensor.accelerometer.xml \
+	frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
+	frameworks/native/data/etc/android.hardware.touchscreen.xml:system/etc/permissions/android.hardware.touchscreen.xml \
+	frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
+	frameworks/native/data/etc/android.hardware.touchscreen.multitouch.distinct.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.distinct.xml \
+	frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
+	frameworks/native/data/etc/android.hardware.usb.host.xml:system/etc/permissions/android.hardware.usb.host.xml
 
 PRODUCT_COPY_FILES += \
 	device/softwinner/wing-common/media_codecs.xml:system/etc/media_codecs.xml \
@@ -131,7 +140,7 @@ PRODUCT_COPY_FILES += \
 	
 # wfd no invite
 PRODUCT_COPY_FILES += \
-    device/softwinner/wing-common/wfd_blacklist.conf:system/etc/wfd_blacklist.conf
+	device/softwinner/wing-common/wfd_blacklist.conf:system/etc/wfd_blacklist.conf
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	persist.sys.strictmode.visual=0 \
@@ -156,8 +165,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	rild.libargs=-d/dev/ttyUSB2 \
-	rild.libpath=/system/lib/libsoftwinner-ril.so \
-
+	rild.libpath=/system/lib/libsoftwinner-ril.so
 	
 PRODUCT_PACKAGES += \
 	com.google.widevine.software.drm.xml \
@@ -167,7 +175,7 @@ PRODUCT_PACKAGES += \
 	libwvm \
 	libWVStreamControlAPI_L3 \
 	libwvdrm_L3 \
-    libdrmdecrypt	
+	libdrmdecrypt
 	
 # pre-installed apks
 #PRODUCT_COPY_FILES += \
@@ -177,7 +185,7 @@ PRODUCT_PACKAGES += \
 	$(call find-copy-subdir-files,*,$(LOCAL_PATH)/googleservice/gapps-jb-20140910-signed/system,system) \
 
 PRODUCT_PACKAGES += \
-		PartnerBookmarksProvider
+	PartnerBookmarksProvider
 
 # if DISPLAY_BUILD_NUMBER := true then
 # BUILD_DISPLAY_ID := $(BUILD_ID).$(BUILD_NUMBER)
@@ -187,12 +195,3 @@ BUILD_NUMBER := $(shell date +%Y%m%d)
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	drm.service.enabled=true
-	
-PRODUCT_PACKAGES += \
-	com.google.widevine.software.drm.xml \
-	com.google.widevine.software.drm \
-	libdrmwvmplugin \
-	libwvm \
-	libWVStreamControlAPI_L3 \
-	libwvdrm_L3 \
-  libdrmdecrypt	
