@@ -48,32 +48,58 @@ int run_prog_and_wait(const char *path, ...)
     return WEXITSTATUS(status);
 }
 
-void mkvfat(const char *device)
+static char FSCK_MSDOS_PATH[] = "/system/bin/fsck_msdos";
+
+static char MKDOSFS_PATH[] = "/system/bin/newfs_msdos";
+
+int fatcheck(const char *device)
 {
+    int pass = 1;
+
+    do {
+        int status = run_prog_and_wait(FSCK_MSDOS_PATH, "-p", device, NULL);
+        switch (status) {
+        case 0: // Filesystem check completed OK
+            break;
+        case 4:
+            if (pass++ < 3)
+                continue; // Filesystem modified - rechecking (pass %d)
+            // Failing check after too many rechecks
+        case 2:  // Filesystem check failed (not a FAT filesystem)
+        default: // Filesystem check failed (unknown exit code)
+            return -1;
+        }
+    } while (0);
+
+    return 0;
 }
+
+void fatformat(const char *device, const char *alias)
+{
+    run_prog_and_wait(MKDOSFS_PATH, "-F", "32", "-O", "android", "-c", "8", "-L", alias, device, NULL);
+}
+
+static char E2FSCK_PATH[] = "/system/bin/e2fsck";
+
+static char MKE2FS_PATH[] = "/system/bin/mke2fs";
 
 int e2fscheck(const char *device)
 {
-    return run_prog_and_wait("/system/bin/e2fsck", "-f", "-y", device, NULL);
+    int status = run_prog_and_wait(E2FSCK_PATH, "-f", "-y", device, NULL);
+    if (status == 8) {
+        // operational error, usually not ext4 file system
+        return -1;
+    }
+    return 0;
 }
 
-#define PROG_MKE2FS "/system/bin/mke2fs"
-
-void mke2fs(const char *device)
+void e2fsformat(const char *device, const char *alias)
 {
-    run_prog_and_wait(PROG_MKE2FS, "-T", "ext4", device, NULL);
+    run_prog_and_wait(MKE2FS_PATH, "-T", "ext4", device, NULL);
 }
 
-void makefs(const char *device, const char *type)
-{
-    if (!type)
-        type = "ext4";
-
-    if (strncmp(type, "ext4", 4) == 0)
-        mke2fs(device);
-    else if (strncmp(type, "vfat", 4) == 0)
-        mkvfat(device);
-}
+typedef int (*fscheck_t)(const char *device);
+typedef void (*fsformat_t)(const char *device, const char *alias);
 
 typedef void (*callback_t)(const char *alias, const char *device);
 
@@ -81,32 +107,31 @@ void setupfs(const char *alias, const char *device)
 {
     char linkpath[64], path[64];
     int ret, fs_format = 0, fs_check = 0;
-    char *fstype = "ext4";
+    fscheck_t fscheck = NULL;
+    fsformat_t fsformat = NULL;
     int status;
 
     snprintf(path, sizeof(path), "/dev/block/%s", device);
     snprintf(linkpath, sizeof(linkpath), "/dev/block/%s", alias);
 
     if (strncmp(alias, "data", 4) == 0) {
-        fs_check = 1;
+        fscheck = e2fscheck;
+        fsformat = e2fsformat;
     } else if (strncmp(alias, "cache", 5) == 0) {
-        fs_check = 1;
+        fscheck = e2fscheck;
+        fsformat = e2fsformat;
     } else if (strncmp(alias, "misc", 4) == 0) {
     } else if (strncmp(alias, "UDISK", 5) == 0) {
-        // format to VFAT
-        fstype = "vfat";
+        fscheck = fatcheck;
+        fsformat = fatformat;
     }
 
-    if (fs_check) {
-        status = e2fscheck(path);
-        if (status == 8) {
-            // operational error, usually caused by unknown file system
-            fs_format = 1;
+    if (fscheck) {
+        status = fscheck(path);
+        if (status) {
+            if (fsformat)
+                fsformat(path, alias);
         }
-    }
-
-    if (fs_format) {
-        makefs(path, "ext4");
     }
 
     // finally create link
