@@ -66,17 +66,6 @@ PRODUCT_PACKAGES += \
 	android.software.live_wallpaper.xml \
 	FileExplore
 
-# softwinner	
-PRODUCT_PACKAGES +=  \
-	android.softwinner.framework.jar \
-	SoftWinnerService.apk \
-	backup/SoftWinnerService.apk \
-	libsoftwinner_servers.so \
-	libupdatesoftwinner.so \
-	librtsp.so \
-	libjni_fireair.so \
-	updatesoftwinner
-
 # keylayout
 PRODUCT_COPY_FILES += \
 	device/softwinner/wing-common/axp20-supplyer.kl:system/usr/keylayout/axp20-supplyer.kl
