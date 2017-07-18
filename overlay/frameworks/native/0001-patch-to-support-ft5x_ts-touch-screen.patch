@@ -1,4 +1,4 @@
-From 0461eca6e0cfb5df4b84c70b16cea97109e677c2 Mon Sep 17 00:00:00 2001
+From 2c9bc1966e67a8f58edbff1f423ad63ec5c391fa Mon Sep 17 00:00:00 2001
 From: Yonghua Zheng <yonghua.zheng@esimtek.com>
 Date: Tue, 18 Jul 2017 14:10:39 +0800
 Subject: [PATCH] patch to support ft5x_ts touch screen
@@ -18,21 +18,21 @@ Change-Id: Ibdc52cfe717db230f0cd82f18bff44679f9f82aa
  1 file changed, 10 insertions(+)
 
 diff --git a/services/inputflinger/InputReader.cpp b/services/inputflinger/InputReader.cpp
-index 8634e42..eb6b7b3 100644
+index 8634e42..2636ff1 100644
 --- a/services/inputflinger/InputReader.cpp
 +++ b/services/inputflinger/InputReader.cpp
-@@ -6079,6 +6079,11 @@ void MultiTouchInputMapper::syncTouch(nsecs_t when, bool* outHavePointerIds) {
-     size_t outCount = 0;
-     BitSet32 newPointerIdBits;
+@@ -6086,6 +6086,11 @@ void MultiTouchInputMapper::syncTouch(nsecs_t when, bool* outHavePointerIds) {
+             continue;
+         }
  
-+    // ignore zero-ed X & Y
-+    if ((inSlot->getX() == 0) && (inSlot->getY() == 0)) {
-+        continue;
-+    }
++        // ignore zero-ed X & Y
++        if ((inSlot->getX() == 0) && (inSlot->getY() == 0)) {
++            continue;
++        }
 +
-     for (size_t inIndex = 0; inIndex < inCount; inIndex++) {
-         const MultiTouchMotionAccumulator::Slot* inSlot =
-                 mMultiTouchMotionAccumulator.getSlot(inIndex);
+         if (outCount >= MAX_POINTERS) {
+ #if DEBUG_POINTERS
+             ALOGD("MultiTouch device %s emitted more than maximum of %d pointers; "
 @@ -6116,9 +6121,14 @@ void MultiTouchInputMapper::syncTouch(nsecs_t when, bool* outHavePointerIds) {
              }
          }
