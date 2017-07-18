@@ -9,23 +9,9 @@ hardware module.
 
 Change-Id: I844f87bfda549c6ca840dd0108e01c06982bb200
 ---
- include/ion/ion.h |  2 ++
  libion/ion.c      | 17 +++++++++++++++++
- 2 files changed, 19 insertions(+)
+ 1 files changed, 17 insertions(+)
 
-diff --git a/include/ion/ion.h b/include/ion/ion.h
-index 018c0a1..2889a9c 100644
---- a/include/ion/ion.h
-+++ b/include/ion/ion.h
-@@ -37,6 +37,8 @@ int ion_map(int fd, struct ion_handle *handle, size_t length, int prot,
-             int flags, off_t offset, unsigned char **ptr, int *map_fd);
- int ion_share(int fd, struct ion_handle *handle, int *share_fd);
- int ion_import(int fd, int share_fd, struct ion_handle **handle);
-+// sunxi
-+int ion_getphyaddr(int fd, void *handle);
- 
- __END_DECLS
- 
 diff --git a/libion/ion.c b/libion/ion.c
 index 020c35b..0c787cc 100644
 --- a/libion/ion.c
