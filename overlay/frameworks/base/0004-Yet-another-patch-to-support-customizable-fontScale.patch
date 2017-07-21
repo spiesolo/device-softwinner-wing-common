@@ -1,0 +1,32 @@
+From 38d0b8ace3b688fce191230cdec741d812ab0bfb Mon Sep 17 00:00:00 2001
+From: Yonghua Zheng <yonghua.zheng@esimtek.com>
+Date: Fri, 21 Jul 2017 12:39:40 +0800
+Subject: [PATCH] Yet another patch to support customizable fontScale
+
+Patch made for Android N:
+
+Due to low density, fonts look small and hard to read
+so provide this patch for customization to set the
+default fontScale.
+
+Change-Id: I1c3532567b790e45369006d5e3a37d6845899291
+---
+ core/java/android/content/res/Configuration.java | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/java/android/content/res/Configuration.java b/core/java/android/content/res/Configuration.java
+index b2d518c..28746f5 100644
+--- a/core/java/android/content/res/Configuration.java
++++ b/core/java/android/content/res/Configuration.java
+@@ -918,7 +918,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
+      * Set this object to the system defaults.
+      */
+     public void setToDefaults() {
+-        fontScale = 1;
++        fontScale = Float.valueOf(android.os.SystemProperties.get("ro.property.fontScale", "1")).floatValue();
+         mcc = mnc = 0;
+         mLocaleList = LocaleList.getEmptyLocaleList();
+         locale = null;
+-- 
+2.7.4
+
